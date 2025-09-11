@@ -222,6 +222,17 @@ def test_message_id_field() -> None:
     assert isinstance(event1.id, str)
     assert isinstance(event2.id, str)
 
+
+
+
+
+
+
+
+
+
+
+
     # Check that IDs are valid UUIDs
     try:
         uuid.UUID(event1.id)
