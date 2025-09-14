@@ -1,5 +1,6 @@
-# Use Open AI with key
 provider: autogen_ext.models.openai.OpenAIChatCompletionClient
 config:
+  # Choose a supported model (examples: gpt-4o, gpt-4o-mini, gpt-4.1, gpt-4.1-mini)
   model: gpt-4o
-  api_key: REPLACE_WITH_YOUR_API_KEY
+  # Do NOT put api_key here; set via environment variable instead:
+  #   export OPENAI_API_KEY=your_key
