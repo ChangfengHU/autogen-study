@@ -8,16 +8,15 @@ from .. import FunctionCall, Image
 
 
 class SystemMessage(BaseModel):
-    """System message contains instructions for the model coming from the developer.
+    """
+    SystemMessage 类用于存储开发者发送给模型的系统消息。
 
     .. note::
 
-        Open AI is moving away from using 'system' role in favor of 'developer' role.
-        See `Model Spec <https://cdn.openai.com/spec/model-spec-2024-05-08.html#definitions>`_ for more details.
-        However, the 'system' role is still allowed in their API and will be automatically converted to 'developer' role
-        on the server side.
-        So, you can use `SystemMessage` for developer messages.
-
+        Open AI 正在逐渐停止使用 'system' 角色，转而使用 'developer' 角色。
+        详细信息请参阅 `Model Spec <https://cdn.openai.com/spec/model-spec-2024-05-08.html#definitions>`_ 。
+        然而，API 仍然允许使用 'system' 角色，并且在服务器端会自动转换为 'developer' 角色。
+        因此，您可以使用 `SystemMessage` 存储开发者消息。
     """
 
     content: str

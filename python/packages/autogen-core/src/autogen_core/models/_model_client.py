@@ -219,22 +219,21 @@ class ChatCompletionClient(ComponentBase[BaseModel], ABC):
         extra_create_args: Mapping[str, Any] = {},
         cancellation_token: Optional[CancellationToken] = None,
     ) -> CreateResult:
-        """Creates a single response from the model.
+        """创建模型的单个响应。
 
         Args:
-            messages (Sequence[LLMMessage]): The messages to send to the model.
-            tools (Sequence[Tool | ToolSchema], optional): The tools to use with the model. Defaults to [].
-            tool_choice (Tool | Literal["auto", "required", "none"], optional): A single Tool object to force the model to use, "auto" to let the model choose any available tool, "required" to force tool usage, or "none" to disable tool usage. Defaults to "auto".
-            json_output (Optional[bool | type[BaseModel]], optional): Whether to use JSON mode, structured output, or neither.
-                Defaults to None. If set to a `Pydantic BaseModel <https://docs.pydantic.dev/latest/usage/models/#model>`_ type,
-                it will be used as the output type for structured output.
-                If set to a boolean, it will be used to determine whether to use JSON mode or not.
-                If set to `True`, make sure to instruct the model to produce JSON output in the instruction or prompt.
-            extra_create_args (Mapping[str, Any], optional): Extra arguments to pass to the underlying client. Defaults to {}.
-            cancellation_token (Optional[CancellationToken], optional): A token for cancellation. Defaults to None.
+            messages (Sequence[LLMMessage]): 要发送给模型的消息。
+            tools (Sequence[Tool | ToolSchema], optional): 要与模型一起使用的工具。默认为 []。
+            tool_choice (Tool | Literal["auto", "required", "none"], optional): 要强制模型使用的单个工具对象，"auto" 表示让模型选择任何可用工具，"required" 表示强制使用工具，"none" 表示禁用工具使用。默认为 "auto"。
+            json_output (Optional[bool | type[BaseModel]], optional): 是否使用 JSON 模式、结构化输出或两者都不是。默认为 None。如果设置为 `Pydantic BaseModel <https://docs.pydantic.dev/latest/usage/models/#model>`_ 类型，
+                它将用作结构化输出的输出类型。
+                如果设置为布尔值，它将用于确定是否使用 JSON 模式。
+                如果设置为 `True`，请确保在指示或提示中指示模型生成 JSON 输出。
+            extra_create_args (Mapping[str, Any], optional): 要传递给底层客户端的额外参数。默认为 {}。
+            cancellation_token (Optional[CancellationToken], optional): 用于取消的令牌。默认为 None。
 
         Returns:
-            CreateResult: The result of the model call.
+            CreateResult: 模型调用的结果。
         """
         ...
 

@@ -84,23 +84,23 @@ class FunctionTool(BaseTool[BaseModel, BaseModel], Component[FunctionToolConfig]
 
     component_provider_override = "autogen_core.tools.FunctionTool"
     component_config_schema = FunctionToolConfig
-
     def __init__(
         self,
-        func: Callable[..., Any],
-        description: str,
-        name: str | None = None,
-        global_imports: Sequence[Import] = [],
-        strict: bool = False,
+        func: Callable[..., Any],  # 接收一个可调用对象作为参数，类型为任意参数和任意返回值的函数
+        description: str,  # 接收一个描述函数功能的字符串作为参数
+        name: str | None = None,  # 函数的名称，可选参数，默认为None
+        global_imports: Sequence[Import] = [],  # 全局导入项的序列，默认为空列表
+        strict: bool = False,  # 严格模式标志，默认为False
     ) -> None:
-        self._func = func
-        self._global_imports = global_imports
-        self._signature = get_typed_signature(func)
+        self._func = func  # 将传入的函数赋值给实例变量_func
+        self._global_imports = global_imports  # 将传入的全局导入项赋值给实例变量_global_imports
+        self._signature = get_typed_signature(func)  # 获取函数的类型化签名
+        # 确定函数的名称
         func_name = name or func.func.__name__ if isinstance(func, functools.partial) else name or func.__name__
-        args_model = args_base_model_from_signature(func_name + "args", self._signature)
-        self._has_cancellation_support = "cancellation_token" in self._signature.parameters
-        return_type = self._signature.return_annotation
-        super().__init__(args_model, return_type, func_name, description, strict)
+        args_model = args_base_model_from_signature(func_name + "args", self._signature)  # 根据函数签名生成参数模型
+        self._has_cancellation_support = "cancellation_token" in self._signature.parameters  # 判断函数是否支持取消标志
+        return_type = self._signature.return_annotation  # 获取函数的返回类型
+        super().__init__(args_model, return_type, func_name, description, strict)  # 调用父类的初始化方法，传入参数模型、返回类型、函数名称、描述和严格模式标志
 
     async def run(self, args: BaseModel, cancellation_token: CancellationToken) -> Any:
         kwargs = {}
