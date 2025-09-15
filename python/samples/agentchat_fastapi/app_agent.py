@@ -7,7 +7,7 @@ import yaml
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.messages import TextMessage
 from autogen_core import CancellationToken
-from autogen_core.models import ChatCompletionClient
+from autogen_core.models import ChatCompletionClient, ModelFamily, ModelInfo
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -120,6 +120,54 @@ async def get_agent() -> AssistantAgent:
                 "Either create a model_config.yaml (see model_config_template.yaml) or set env vars such as OPENAI_API_KEY "
                 "(and optional OPENAI_MODEL), or Azure envs: AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_VERSION, AZURE_OPENAI_API_KEY, AZURE_OPENAI_DEPLOYMENT."
             )
+    # Try to ensure model_info for custom/unknown model names (e.g., Azure deployment aliases)
+    try:
+        provider = (model_config or {}).get("provider", "")
+        cfg = (model_config or {}).get("config", {})
+        model_name = cfg.get("model")
+        if (
+            isinstance(provider, str)
+            and ".openai." in provider
+            and isinstance(cfg, dict)
+            and isinstance(model_name, str)
+            and "model_info" not in cfg
+        ):
+            def _infer_model_info(name: str) -> ModelInfo:
+                n = name.lower()
+                info: ModelInfo = {
+                    "vision": True,
+                    "function_calling": True,
+                    "json_output": True,
+                    "family": ModelFamily.GPT_4O,
+                    "structured_output": True,
+                    "multiple_system_messages": True,
+                }
+                if any(k in n for k in ["o4", "gpt-4.5"]):
+                    info["family"] = ModelFamily.O4
+                elif "o3" in n:
+                    info["family"] = ModelFamily.O3
+                    if "mini" in n:
+                        info["vision"] = False
+                elif "o1" in n:
+                    info["family"] = ModelFamily.O1
+                    info["json_output"] = False
+                    info["structured_output"] = True
+                elif "gpt-4o" in n:
+                    info["family"] = ModelFamily.GPT_4O
+                elif "gpt-4" in n:
+                    info["family"] = ModelFamily.GPT_4
+                elif "gpt-3.5" in n or "gpt-35" in n:
+                    info["family"] = ModelFamily.GPT_35
+                    info["vision"] = False
+                    info["structured_output"] = False
+                else:
+                    info["family"] = ModelFamily.UNKNOWN
+                return info
+
+            cfg["model_info"] = _infer_model_info(model_name)
+    except Exception:
+        pass
+
     model_client = ChatCompletionClient.load_component(model_config)
     # Create the assistant agent.
     agent = AssistantAgent(
