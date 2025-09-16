@@ -176,9 +176,9 @@ class ComponentLoader:
     def load_component(
         cls, model: ComponentModel | Dict[str, Any], expected: Type[ExpectedType] | None = None
     ) -> Self | ExpectedType:
-        """Load a component from a model. Intended to be used with the return type of :py:meth:`autogen_core.ComponentConfig.dump_component`.
+        """从模型中加载一个组件。旨在与 :py:meth:`autogen_core.ComponentConfig.dump_component` 的返回类型一起使用。
 
-        Example:
+        示例：
 
             .. code-block:: python
 
@@ -190,53 +190,59 @@ class ComponentLoader:
                 model_client = ChatCompletionClient.load_component(component)
 
         Args:
-            model (ComponentModel): The model to load the component from.
+            model (ComponentModel): 要从中加载组件的模型。
 
         Returns:
-            Self: The loaded component.
+            Self: 加载后的组件。
 
         Args:
             model (ComponentModel): _description_
-            expected (Type[ExpectedType] | None, optional): Explicit type only if used directly on ComponentLoader. Defaults to None.
+            expected (Type[ExpectedType] | None, optional): 仅在直接在 ComponentLoader 上使用时需要显式类型。默认为 None。
 
         Raises:
-            ValueError: If the provider string is invalid.
-            TypeError: Provider is not a subclass of ComponentConfigImpl, or the expected type does not match.
+            ValueError: 如果提供的字符串无效。
+            TypeError: 提供者不是 ComponentConfigImpl 的子类，或者期望的类型不匹配。
 
         Returns:
-            Self | ExpectedType: The loaded component.
+            Self | ExpectedType: 加载后的组件。
         """
-
         # Use global and add further type checks
 
         if isinstance(model, dict):
             loaded_model = ComponentModel(**model)
         else:
             loaded_model = model
-
-        # First, do a look up in well known providers
+        # 首先，在众所周知的提供商中进行查找
         if loaded_model.provider in WELL_KNOWN_PROVIDERS:
             loaded_model.provider = WELL_KNOWN_PROVIDERS[loaded_model.provider]
-
+        # 将 loaded_model.provider 按照最后一个"."进行分割，得到模块路径和类名
         output = loaded_model.provider.rsplit(".", maxsplit=1)
+        # 检查分割后的结果是否为两部分，如果不是则抛出数值错误
         if len(output) != 2:
             raise ValueError("Invalid")
 
+        # 将模块路径和类名分别赋值给 module_path 和 class_name
         module_path, class_name = output
+        # 根据模块路径动态导入对应的模块
         module = importlib.import_module(module_path)
+        # 从导入的模块中获取对应的类
         component_class = module.__getattribute__(class_name)
 
+        # 检查获取的类是否为有效的组件类
         if not is_component_class(component_class):
             raise TypeError("Invalid component class")
 
-        # We need to check the schema is valid
+        # 检查组件类是否定义了 component_config_schema 属性
         if not hasattr(component_class, "component_config_schema"):
             raise AttributeError("component_config_schema not defined")
 
+        # 检查组件类是否定义了 component_type 属性
         if not hasattr(component_class, "component_type"):
             raise AttributeError("component_type not defined")
 
+        # 获取加载的配置版本号，如果未指定则使用组件类的版本号
         loaded_config_version = loaded_model.component_version or component_class.component_version
+        # 如果加载的配置版本号低于组件类的版本号，则尝试使用 _from_config_past_version 方法创建实例
         if loaded_config_version < component_class.component_version:
             try:
                 instance = component_class._from_config_past_version(loaded_model.config, loaded_config_version)  # type: ignore
@@ -244,13 +250,15 @@ class ComponentLoader:
                 raise NotImplementedError(
                     f"Tried to load component {component_class} which is on version {component_class.component_version} with a config on version {loaded_config_version} but _from_config_past_version is not implemented"
                 ) from e
+        # 如果加载的配置版本号不低于组件类的版本号，则对加载的配置进行验证，并使用 _from_config 方法创建实例
         else:
+            # 获取组件类的配置模式，用于对加载的模型配置进行验证
             schema = component_class.component_config_schema  # type: ignore
+            # 调用配置模式的 model_validate 方法，对加载的模型配置进行验证
             validated_config = schema.model_validate(loaded_model.config)
-
-            # We're allowed to use the private method here
-            instance = component_class._from_config(validated_config)  # type: ignore
-
+            # 在这里允许使用私有方法
+            # 通过调用组件类的_from_config方法，根据经过验证的配置validated_config创建一个组件实例
+            instance = component_class._from_config(validated_config) # type: ignore
         if expected is None and not isinstance(instance, cls):
             raise TypeError("Expected type does not match")
         elif expected is None:
@@ -353,6 +361,11 @@ def is_component_instance(cls: Any) -> TypeGuard[_ConcreteComponent[BaseModel]]:
 
 
 def is_component_class(cls: type) -> TypeGuard[Type[_ConcreteComponent[BaseModel]]]:
+    # 检查传入的类是否满足以下条件：
+    # 1. 是 ComponentFromConfig 类或其子类
+    # 2. 是 ComponentToConfig 类或其子类
+    # 3. 是 ComponentSchemaType 类或其子类
+    # 4. 是 ComponentLoader 类或其子类
     return (
         issubclass(cls, ComponentFromConfig)
         and issubclass(cls, ComponentToConfig)

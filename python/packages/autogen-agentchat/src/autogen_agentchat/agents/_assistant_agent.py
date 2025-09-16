@@ -912,21 +912,33 @@ class AssistantAgent(BaseChatAgent, Component[AssistantAgentConfig]):
         Yields:
             Events, messages and final response during processing
         """
-
-        # Gather all relevant state here
+        # 获取代理名称
         agent_name = self.name
+        # 获取模型上下文信息
         model_context = self._model_context
+        # 获取代理的记忆信息
         memory = self._memory
+        # 获取系统消息
         system_messages = self._system_messages
+        # 获取工作台信息
         workbench = self._workbench
+        # 获取交接工具信息
         handoff_tools = self._handoff_tools
+        # 获取交接信息
         handoffs = self._handoffs
+        # 获取模型客户端
         model_client = self._model_client
+        # 获取模型客户端流
         model_client_stream = self._model_client_stream
+        # 获取工具使用反射信息
         reflect_on_tool_use = self._reflect_on_tool_use
+        # 获取工具的最大迭代次数
         max_tool_iterations = self._max_tool_iterations
+        # 获取工具调用摘要格式
         tool_call_summary_format = self._tool_call_summary_format
+        # 获取工具调用摘要格式化器
         tool_call_summary_formatter = self._tool_call_summary_formatter
+        # 获取输出内容类型
         output_content_type = self._output_content_type
 
         # STEP 1: Add new user/handoff messages to the model context

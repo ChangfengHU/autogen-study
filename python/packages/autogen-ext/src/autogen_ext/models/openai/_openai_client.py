@@ -1494,13 +1494,18 @@ class OpenAIChatCompletionClient(BaseOpenAIChatCompletionClient, Component[OpenA
         return OpenAIClientConfigurationConfigModel(**copied_config)
 
     @classmethod
+    # 从配置文件中创建实例的类方法
     def _from_config(cls, config: OpenAIClientConfigurationConfigModel) -> Self:
+        # 深拷贝配置文件，确保不修改原始对象
         copied_config = config.model_copy().model_dump(exclude_none=True)
 
-        # Handle api_key as SecretStr
+        # 将 api_key 字段处理为 SecretStr 类型
+        # 如果配置中存在 "api_key" 字段，并且 api_key 是 SecretStr 类型
         if "api_key" in copied_config and isinstance(config.api_key, SecretStr):
+            # 获取 api_key 的真实值，而不是 SecretStr 对象
             copied_config["api_key"] = config.api_key.get_secret_value()
 
+        # 使用拷贝后的配置参数创建类的实例并返回
         return cls(**copied_config)
 
 
