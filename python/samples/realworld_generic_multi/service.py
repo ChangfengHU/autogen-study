@@ -8,10 +8,9 @@ from .provider import WeatherProvider
 
 
 class WeatherBackend(ServiceBase):
-    """Concrete backend that delegates to a WeatherProvider.
+    """具体后端：委托给 WeatherProvider 获取数据。
 
-    This sits at the bottom of the MRO so that mixins can call ``super().fetch``
-    and eventually land here to retrieve the actual data.
+    该类位于 MRO 底部，使得各个 mixin 通过 ``super().fetch`` 最终落到这里取真实数据。
     """
 
     def __init__(self, provider: WeatherProvider) -> None:
@@ -24,17 +23,16 @@ class WeatherBackend(ServiceBase):
 
 
 class WeatherService(CacheMixin, RateLimitMixin, Component[WeatherServiceConfig], WeatherBackend):
-    """Weather service combining behaviors via multiple inheritance.
+    """通过多继承组合行为的天气服务。
 
-    Order matters (left-most mixin runs first):
+    顺序很重要（最左侧的 mixin 最先运行）：
     CacheMixin -> RateLimitMixin -> Component[Config] -> WeatherBackend
     """
 
     def __init__(self, provider: WeatherProvider, config: WeatherServiceConfig) -> None:
-        # Initialize all bases explicitly for clarity; in large codebases, prefer cooperative
-        # __init__ with super() if bases are designed for it.
+        # 为了示例清晰，这里显式初始化所有基类；
+        # 在大型代码库中，若各基类已设计为可协作，优先使用 super() 协作初始化。
         CacheMixin.__init__(self)
         RateLimitMixin.__init__(self)
         Component.__init__(self, config)
         WeatherBackend.__init__(self, provider)
-

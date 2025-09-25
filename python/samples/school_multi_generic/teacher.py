@@ -6,9 +6,9 @@ from .mixins import AttendanceMixin, GradebookMixin
 
 
 class Teacher(AttendanceMixin, Component[TeacherConfig], PersonBase):
-    """Teacher with attendance and typed config.
+    """具备出勤与强类型配置的教师类。
 
-    Provides an operation to assign a grade to any object supporting Gradebook-like API.
+    提供对具备成绩册能力（GradebookMixin）的对象进行打分的操作。
     """
 
     def __init__(self, name: str, config: TeacherConfig) -> None:
@@ -18,4 +18,3 @@ class Teacher(AttendanceMixin, Component[TeacherConfig], PersonBase):
 
     def assign_grade(self, learner: GradebookMixin, course: str, score: float) -> None:
         learner.record_grade(course, score)
-

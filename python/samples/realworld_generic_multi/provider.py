@@ -5,7 +5,7 @@ from typing import Protocol
 
 
 class WeatherProvider(Protocol):
-    """Protocol for a weather data backend."""
+    """天气数据后端的协议（接口）。"""
 
     def get_weather(self, city: str) -> str:  # simplified for the demo
         ...
@@ -13,8 +13,7 @@ class WeatherProvider(Protocol):
 
 @dataclass(slots=True)
 class MockWeatherProvider:
-    """A mock provider returning deterministic strings (no network)."""
+    """返回可预测字符串的模拟提供者（无需网络）。"""
 
     def get_weather(self, city: str) -> str:
         return f"Sunny 25°C in {city}"
-

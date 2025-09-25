@@ -4,7 +4,7 @@ from typing import Dict, List, Set
 
 
 class AttendanceMixin:
-    """Reusable attendance behavior for persons."""
+    """可复用的出勤行为。"""
 
     def __init__(self) -> None:
         self._present_days: Set[str] = set()
@@ -17,9 +17,9 @@ class AttendanceMixin:
 
 
 class GradebookMixin:
-    """Reusable gradebook behavior for learners.
+    """可复用的成绩册功能。
 
-    Expects an attribute ``config.max_courses`` when used with a typed component.
+    当与持有配置的组件一同使用时，期望存在 ``config.max_courses``。
     """
 
     def __init__(self) -> None:
@@ -28,7 +28,7 @@ class GradebookMixin:
     def record_grade(self, course: str, score: float) -> None:
         max_courses = getattr(self.config, "max_courses", 0)
         if course not in self._grades and max_courses > 0 and len(self._grades) >= max_courses:
-            raise ValueError("Reached max_courses; cannot add a new course")
+            raise ValueError("已达到可选科目上限，无法新增课程")
         self._grades.setdefault(course, []).append(score)
 
     def average(self, course: str) -> float:
@@ -39,4 +39,3 @@ class GradebookMixin:
 
     def courses(self) -> List[str]:
         return list(self._grades.keys())
-

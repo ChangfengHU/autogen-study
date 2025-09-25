@@ -7,7 +7,7 @@ TConfig = TypeVar("TConfig")
 
 
 class Component(Generic[TConfig]):
-    """Generic component base holding a strongly-typed config."""
+    """泛型组件基类，持有强类型配置。"""
 
     def __init__(self, config: TConfig) -> None:
         self.config: TConfig = config
@@ -15,10 +15,10 @@ class Component(Generic[TConfig]):
 
 @dataclass(slots=True)
 class StudentConfig:
-    """Typed configuration for Student roles.
+    """学生角色的强类型配置。
 
-    Attributes:
-        max_courses: Maximum distinct courses a student can be graded on.
+    属性：
+        max_courses: 学生可被评分的不同科目上限。
     """
 
     max_courses: int = 4
@@ -26,11 +26,10 @@ class StudentConfig:
 
 @dataclass(slots=True)
 class TeacherConfig:
-    """Typed configuration for Teacher roles.
+    """教师角色的强类型配置。
 
-    Attributes:
-        department: Department name.
+    属性：
+        department: 所在学院/部门名称。
     """
 
     department: str = "Math"
-

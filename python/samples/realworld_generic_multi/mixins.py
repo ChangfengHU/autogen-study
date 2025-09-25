@@ -6,9 +6,9 @@ from typing import Any, Deque, Dict, Hashable, Tuple
 
 
 class ServiceBase:
-    """Abstract service protocol for mixins to cooperate via super().
+    """抽象服务协议：为 mixin 通过 super() 协作预留接口。
 
-    Subclasses should override ``fetch(key: Hashable) -> Any``.
+    子类应实现 ``fetch(key: Hashable) -> Any``。
     """
 
     def fetch(self, key: Hashable) -> Any:  # pragma: no cover - interface only
@@ -16,13 +16,13 @@ class ServiceBase:
 
 
 class CacheMixin(ServiceBase):
-    """Simple TTL cache mixin.
+    """简单的 TTL 缓存 Mixin。
 
-    Expects ``self.config.cache_ttl_seconds`` to exist (provided by a config-holding base).
+    期望存在 ``self.config.cache_ttl_seconds``（由持有配置的基类提供）。
     """
 
     def __init__(self) -> None:
-        # Mixin keeps init self-contained to avoid forcing cooperative super() chains.
+        # Mixin 的初始化尽量自洽，避免强制整个继承链必须 super() 协作。
         self._cache: Dict[Hashable, Tuple[float, Any]] = {}
 
     def fetch(self, key: Hashable) -> Any:
@@ -42,13 +42,13 @@ class CacheMixin(ServiceBase):
 
 
 class RateLimitMixin(ServiceBase):
-    """Simple per-minute rolling window rate limiter mixin.
+    """简单的“每分钟滚动窗口”限流 Mixin。
 
-    Expects ``self.config.rate_limit_per_minute`` to exist.
+    期望存在 ``self.config.rate_limit_per_minute``。
     """
 
     def __init__(self) -> None:
-        # Mixin keeps init self-contained to avoid forcing cooperative super() chains.
+        # Mixin 的初始化尽量自洽，避免强制整个继承链必须 super() 协作。
         self._calls: Deque[float] = deque()
 
     def fetch(self, key: Hashable) -> Any:
@@ -60,6 +60,6 @@ class RateLimitMixin(ServiceBase):
             while self._calls and self._calls[0] < window_start:
                 self._calls.popleft()
             if len(self._calls) >= limit:
-                raise RuntimeError("Rate limit exceeded")
+                raise RuntimeError("超过每分钟限流阈值")
             self._calls.append(now)
         return super().fetch(key)
