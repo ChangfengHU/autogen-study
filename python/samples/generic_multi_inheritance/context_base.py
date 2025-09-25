@@ -10,6 +10,7 @@ class ChatCompletionContext:
     """
 
     def __init__(self) -> None:
+        # 保存 (角色, 内容) 的简单消息历史
         self._messages: List[Tuple[str, str]] = []
 
     def add_message(self, role: str, content: str) -> None:
@@ -18,6 +19,7 @@ class ChatCompletionContext:
 
     def last_user_message(self) -> Optional[str]:
         """返回最近一条用户消息（若存在）。"""
+        # 逆序扫描，遇到第一条 user 即返回
         for role, content in reversed(self._messages):
             if role == "user":
                 return content

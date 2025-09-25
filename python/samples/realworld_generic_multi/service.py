@@ -14,10 +14,11 @@ class WeatherBackend(ServiceBase):
     """
 
     def __init__(self, provider: WeatherProvider) -> None:
-        super().__init__()
+        # ServiceBase 没有状态，这里无需 super()；保持简单
         self._provider = provider
 
     def fetch(self, key: Hashable) -> Any:
+        # 统一将 key 视为城市名称字符串
         city = str(key)
         return self._provider.get_weather(city)
 

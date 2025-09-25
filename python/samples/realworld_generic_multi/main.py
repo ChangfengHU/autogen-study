@@ -7,9 +7,11 @@ from .service import WeatherService
 
 def demo() -> None:
     provider = MockWeatherProvider()
+    # 缓存 5 秒；限流 3 次/分钟
     config = WeatherServiceConfig(cache_ttl_seconds=5, rate_limit_per_minute=3)
     service = WeatherService(provider, config)
 
+    # 同一城市多次请求，应有缓存命中
     cities = ["Shanghai", "Shanghai", "Beijing", "Shanghai"]
 
     print("== 请求（缓存生效，仍保留限流） ==")
@@ -22,6 +24,7 @@ def demo() -> None:
 
     print("\n== 请求（更换不同城市以触发限流） ==")
     # Reset service to isolate counters from the previous phase.
+    # 重置服务以清空计数器；随后用 4 个不同城市触发限流
     service = WeatherService(provider, config)
     varying = ["A", "B", "C", "D"]  # 4 unique -> limit is 3, expect 4th to fail
     for i, city in enumerate(varying, 1):

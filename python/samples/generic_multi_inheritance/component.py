@@ -14,6 +14,7 @@ class Component(Generic[TConfig]):
     """
 
     def __init__(self, config: TConfig) -> None:
+        # 强类型配置对象，贯穿组件生命周期
         self.config: TConfig = config
         self._started: bool = False
 

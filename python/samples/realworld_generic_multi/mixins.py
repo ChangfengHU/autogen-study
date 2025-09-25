@@ -33,10 +33,13 @@ class CacheMixin(ServiceBase):
             if hit is not None:
                 expires_at, value = hit
                 if expires_at > now:
+                    # 命中缓存，直接返回
                     return value
 
+        # 未命中则向下游获取真实数据
         value = super().fetch(key)
         if ttl > 0:
+            # 写入缓存并设置过期时间
             self._cache[key] = (now + ttl, value)
         return value
 
@@ -62,4 +65,5 @@ class RateLimitMixin(ServiceBase):
             if len(self._calls) >= limit:
                 raise RuntimeError("超过每分钟限流阈值")
             self._calls.append(now)
+        # 通过 super() 继续传递到下一层（缓存或真实后端）
         return super().fetch(key)

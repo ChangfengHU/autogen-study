@@ -30,7 +30,7 @@ class UnboundedChatCompletionContext(
     """
 
     def __init__(self, config: UnboundedChatCompletionContextConfig) -> None:
-        # 本示例中显式初始化两个基类，便于读者理解。
+        # 显式初始化两个父类（也可以设计为 super() 协作式初始化）
         ChatCompletionContext.__init__(self)
         Component.__init__(self, config)
 
@@ -39,6 +39,7 @@ class UnboundedChatCompletionContext(
 
     def add_message(self, role: str, content: str) -> None:
         """追加消息并遵守配置中的 max_messages 上限。"""
+        # 使用 super() 调用左侧父类 ChatCompletionContext 的 add_message
         super().add_message(role, content)
         # 超出上限时从头部裁剪，保持软上限。
         overflow = len(self._messages) - self.config.max_messages

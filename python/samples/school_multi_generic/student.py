@@ -9,6 +9,7 @@ class Student(AttendanceMixin, GradebookMixin, Component[StudentConfig], PersonB
     """通过多继承与强类型配置组合而成的学生类。"""
 
     def __init__(self, name: str, config: StudentConfig) -> None:
+        # 显式初始化各父类，清晰展示组合关系
         AttendanceMixin.__init__(self)
         GradebookMixin.__init__(self)
         Component.__init__(self, config)

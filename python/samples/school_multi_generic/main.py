@@ -6,15 +6,18 @@ from .teacher import Teacher
 
 
 def demo() -> None:
+    # 学生最多 2 门科目；教师在物理系
     alice = Student(name="Alice", config=StudentConfig(max_courses=2))
     bob = Teacher(name="Bob", config=TeacherConfig(department="Physics"))
 
     # Attendance
+    # 记录出勤
     alice.mark_present("2025-09-25")
     alice.mark_present("2025-09-26")
     bob.mark_present("2025-09-26")
 
     # Grading via teacher API (operates on student's GradebookMixin)
+    # 教师给学生多门课程打分
     bob.assign_grade(alice, "Math", 95)
     bob.assign_grade(alice, "Math", 85)
     bob.assign_grade(alice, "Chemistry", 88)
