@@ -723,26 +723,26 @@ class AssistantAgent(BaseChatAgent, Component[AssistantAgentConfig]):
 
     def __init__(
         self,
-        name: str,
-        model_client: ChatCompletionClient,
+        name: str,  # 代理名称
+        model_client: ChatCompletionClient,  # 聊天完成客户端
         *,
-        tools: List[BaseTool[Any, Any] | Callable[..., Any] | Callable[..., Awaitable[Any]]] | None = None,
-        workbench: Workbench | Sequence[Workbench] | None = None,
-        handoffs: List[HandoffBase | str] | None = None,
-        model_context: ChatCompletionContext | None = None,
-        description: str = "An agent that provides assistance with ability to use tools.",
+        tools: List[BaseTool[Any, Any] | Callable[..., Any] | Callable[..., Awaitable[Any]]] | None = None,  # 工具列表，可以是BaseTool、可调用对象或可等待对象的列表
+        workbench: Workbench | Sequence[Workbench] | None = None,  # 工作台，可以是单个Workbench对象或Workbench对象的序列
+        handoffs: List[HandoffBase | str] | None = None,  # 移交列表，可以是HandoffBase对象或字符串的列表
+        model_context: ChatCompletionContext | None = None,  # 聊天完成上下文
+        description: str = "An agent that provides assistance with ability to use tools.",  # 描述信息，默认为提供带有使用工具功能的助手代理
         system_message: (
-            str | None
+                str | None
         ) = "You are a helpful AI assistant. Solve tasks using your tools. Reply with TERMINATE when the task has been completed.",
-        model_client_stream: bool = False,
-        reflect_on_tool_use: bool | None = None,
-        max_tool_iterations: int = 1,
-        tool_call_summary_format: str = "{result}",
-        tool_call_summary_formatter: Callable[[FunctionCall, FunctionExecutionResult], str] | None = None,
-        output_content_type: type[BaseModel] | None = None,
-        output_content_type_format: str | None = None,
-        memory: Sequence[Memory] | None = None,
-        metadata: Dict[str, str] | None = None,
+        model_client_stream: bool = False,  # 模型客户端流，默认为False
+        reflect_on_tool_use: bool | None = None,  # 反映工具使用，默认为None
+        max_tool_iterations: int = 1,  # 最大工具迭代次数，默认为1
+        tool_call_summary_format: str = "{result}",  # 工具调用摘要格式，默认为"{result}"
+        tool_call_summary_formatter: Callable[[FunctionCall, FunctionExecutionResult], str] | None = None,  # 工具调用摘要格式化程序，默认为None
+        output_content_type: type[BaseModel] | None = None,  # 输出内容类型，默认为None
+        output_content_type_format: str | None = None,  # 输出内容类型格式，默认为None
+        memory: Sequence[Memory] | None = None,  # 记忆，可以是Memory对象的序列或None
+        metadata: Dict[str, str] | None = None,  # 元数据，可以是键值对的字典或None
     ):
         super().__init__(name=name, description=description)
         self._metadata = metadata or {}
@@ -941,38 +941,38 @@ class AssistantAgent(BaseChatAgent, Component[AssistantAgentConfig]):
         # 获取输出内容类型
         output_content_type = self._output_content_type
 
-        # STEP 1: Add new user/handoff messages to the model context
+        # STEP 1: 将新用户/交接消息添加到模型上下文中
         await self._add_messages_to_context(
-            model_context=model_context,
-            messages=messages,
+            model_context=model_context,  # 将消息添加到模型上下文中
+            messages=messages,  # 待添加的消息列表
         )
 
-        # STEP 2: Update model context with any relevant memory
-        inner_messages: List[BaseAgentEvent | BaseChatMessage] = []
+        # STEP 2: 使用相关内存更新模型上下文
+        inner_messages: List[BaseAgentEvent | BaseChatMessage] = []  # 初始化内部消息列表
         for event_msg in await self._update_model_context_with_memory(
-            memory=memory,
-            model_context=model_context,
-            agent_name=agent_name,
+            memory=memory,  # 内存数据
+            model_context=model_context,  # 模型上下文
+            agent_name=agent_name,  # 代理名称
         ):
-            inner_messages.append(event_msg)
-            yield event_msg
+            inner_messages.append(event_msg)  # 将事件消息添加到内部消息列表
+            yield event_msg  # 生成器返回事件消息
 
-        # STEP 3: Generate a message ID for correlation between streaming chunks and final message
-        message_id = str(uuid.uuid4())
+        # STEP 3: 为流式数据块和最终消息之间的关联生成消息ID
+        message_id = str(uuid.uuid4())  # 生成唯一的消息ID
 
-        # STEP 4: Run the first inference
-        model_result = None
+        # STEP 4: 运行第一次推理
+        model_result = None  # 初始化模型结果为None
         async for inference_output in self._call_llm(
-            model_client=model_client,
-            model_client_stream=model_client_stream,
-            system_messages=system_messages,
-            model_context=model_context,
-            workbench=workbench,
-            handoff_tools=handoff_tools,
-            agent_name=agent_name,
-            cancellation_token=cancellation_token,
-            output_content_type=output_content_type,
-            message_id=message_id,
+            model_client=model_client,  # 模型客户端
+            model_client_stream=model_client_stream,  # 模型客户端流
+            system_messages=system_messages,  # 系统消息
+            model_context=model_context,  # 模型上下文
+            workbench=workbench,  # 工作台
+            handoff_tools=handoff_tools,  # 交接工具
+            agent_name=agent_name,  # 代理名称
+            cancellation_token=cancellation_token,  # 取消令牌
+            output_content_type=output_content_type,  # 输出内容类型
+            message_id=message_id,  # 消息ID
         ):
             if isinstance(inference_output, CreateResult):
                 model_result = inference_output
